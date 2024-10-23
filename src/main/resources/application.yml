@@ -1,5 +1,5 @@
 server:
-  port: 8178
+  port: 8165
 
 avro:
   topic:

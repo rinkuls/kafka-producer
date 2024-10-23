@@ -1,4 +1,4 @@
-package com.kafka.producer.Kafka.Producer.model;
+package com.kafka.producer.model;
 
 import java.io.Serializable;
 

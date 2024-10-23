@@ -1,4 +1,4 @@
-package com.kafka.producer.Kafka.Producer.service;
+package com.kafka.producer.service;
 
 import com.rinkul.avro.schema.StudentRecord;
 import org.slf4j.Logger;

@@ -1,4 +1,4 @@
-package com.kafka.producer.Kafka.Producer.config;
+package com.kafka.producer.config;
 
 import com.rinkul.avro.schema.StudentRecord;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;

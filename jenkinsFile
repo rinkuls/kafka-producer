@@ -16,7 +16,7 @@ node {
         // Stage 2: Build Application
         stage('Build Application') {
             echo "Building the Kafka Producer Java Application with Maven"
-            sh "mvn clean install"
+            bat "mvn clean install"
         }
 
         // Stage 3: Build Docker Image
@@ -27,29 +27,32 @@ node {
         }
 
         // Stage 4: Push Docker Image to Docker Hub
-        stage('Push Docker Image to Docker Hub') {
-            withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials-id', passwordVariable: 'DOCKER_HUB_PASSWORD', usernameVariable: 'DOCKER_HUB_USERNAME')]) {
-                echo "Logging into Docker Hub"
-                sh '''
-                    docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD
-                '''
-                echo "Pushing Docker image to Docker Hub"
-                sh "docker push ${dockerImageTag}"
-            }
+       // Push Docker Image to Docker Hub
+              stage('Push Docker Image to Docker Hub') {
+                  withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials-id', passwordVariable: 'DOCKER_HUB_PASSWORD', usernameVariable: 'DOCKER_HUB_USERNAME')]) {
+                      // Log in to Docker Hub
+                      bat '''
+                          docker login -u %DOCKER_HUB_USERNAME% -p %DOCKER_HUB_PASSWORD% || exit 255
+                      '''
+
+                      // Push Docker image to Docker Hub
+                      bat "docker push ${dockerImageTag} || exit 255"
+                  }
+              }
+  stage('Deploy to Minikube with Helm') {
+            echo "Deploying to Minikube using Helm with image: ${dockerImageTag}"
+            bat 'kubectl config use-context minikube'
+
+            // Update Helm chart with new Docker image tag
+            bat "helm upgrade --install ${releaseName} ${helmChartName} --set image.tag=${buildNumber} --namespace default || exit 255"
+
+            // Verify Helm release status
+            bat "helm status ${releaseName} || exit 255"
+
+            // Optionally, check pod status after the deployment
+            bat 'kubectl get pods --namespace default || exit 255'
         }
 
-        // Stage 5: Deploy to Minikube with Helm
-        stage('Deploy to Minikube with Helm') {
-            echo "Deploying Kafka Producer application to Minikube using Helm"
-            sh 'kubectl config use-context minikube'
-
-            // Helm deployment with the new Docker image
-            sh "helm upgrade --install ${releaseName} ${helmChartName} --set image.tag=${buildNumber} --namespace default"
-
-            // Verify the deployment
-            sh "helm status ${releaseName}"
-            sh 'kubectl get pods --namespace default'
-        }
 
 
     } catch (Exception e) {

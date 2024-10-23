@@ -9,13 +9,17 @@ metadata:
     app.kubernetes.io/component: "confluent-operator"
     helm.sh/chart: {{ include "confluent-operator.chart" . }}
   name: confluent-operator
-  namespace:  {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
+  type: {{ .Values.service.type }}  # Reference to the service type from values.yaml
   ports:
     - name: http-metric
       port: 7778
       protocol: TCP
       targetPort: 7778
+      {{- if eq .Values.service.type "NodePort" }}
+      nodePort: {{ .Values.service.nodePort }}  # Optional: NodePort if service type is NodePort
+      {{- end }}
     {{- if (.Values.webhooks.enabled) }}
     - name: webhook
       port: {{ .Values.webhooks.port }}
@@ -25,4 +29,3 @@ spec:
   selector:
     app: "confluent-operator"
     app.kubernetes.io/name: "confluent-operator"
-  type: ClusterIP

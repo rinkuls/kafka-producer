@@ -2,8 +2,9 @@ node {
     def WORKSPACE = "/var/lib/jenkins/workspace/kafka-producer"
     def buildNumber = env.BUILD_NUMBER ?: '0'  // Jenkins build number
     def dockerImageTag = "rinkuls/kafka-producer:${buildNumber}"  // Docker image tag
-    def helmChartName = "${WORKSPACE}/kafka-producer"
-    def releaseName = "kafka-producer"
+    def helmChartName = "kafka-producer-chart"
+    def releaseName = "kafka-producer-release"
+
 
 
     try {
@@ -45,14 +46,16 @@ node {
             bat 'kubectl config use-context minikube'
 
             // Update Helm chart with new Docker image tag
-         //   bat "helm upgrade --install ${releaseName} ${helmChartName} --set image.tag=${buildNumber} --namespace default || exit 255"
              bat "helm upgrade --install ${releaseName} ${helmChartName} --set image.tag=${buildNumber} --namespace default || exit 255"
+
+
 
             // Verify Helm release status
             bat "helm status ${releaseName} || exit 255"
 
             // Optionally, check pod status after the deployment
             bat 'kubectl get pods --namespace default || exit 255'
+
 
         }
 

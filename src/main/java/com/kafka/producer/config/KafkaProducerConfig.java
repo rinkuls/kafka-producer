@@ -4,7 +4,6 @@ import com.rinkul.avro.schema.StudentRecord;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.config.TopicConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,30 +19,32 @@ import java.util.Map;
 @Configuration
 public class KafkaProducerConfig {
 
-
     @Value("${spring.kafka.bootstrap-servers}")
-    private String kafkaServer;
+    private String kafkaServer;  // This will now pick the value from application.yaml
+
+    @Value("${avro.topic.name}")
+    private String topicName;
+
+    @Value("${spring.kafka.producer.properties.schema.registry.url}")
+    private String schemaRegistryUrl;  // New: to pick the schema registry URL from application.yaml
+
     @Bean
     public KafkaTemplate<String, StudentRecord> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
-    @Value("${avro.topic.name}")
-    String topicName;
+
     @Bean
-    public NewTopic createTopic(){
+    public NewTopic createTopic() {
         return new NewTopic(topicName, 3, (short) 1);
     }
-
-
 
     @Bean
     public Map<String, Object> producerConfigs() {
         Map<String, Object> props = new HashMap<>();
-
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.178.24:9092");
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);  // Using the injected kafkaServer
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
-        props.put("schema.registry.url", "http://192.168.178.24:8081");
+        props.put("schema.registry.url", schemaRegistryUrl);  // Using the injected schemaRegistryUrl
 
         return props;
     }

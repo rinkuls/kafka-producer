@@ -50,10 +50,12 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.hostIP
-          volumeMounts:
-            - name: sslcert
-              mountPath: /etc/certificates
-      volumes:
-        - name: sslcert
-          secret:
-            secretName: confluent-cert
+          # Commenting out the sslcert volumeMount
+          # volumeMounts:
+          #   - name: sslcert
+          #     mountPath: /etc/certificates
+      # Commenting out the volumes section
+      # volumes:
+      #   - name: sslcert
+      #     secret:
+      #       secretName: confluent-cert

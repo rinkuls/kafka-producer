@@ -11,7 +11,7 @@ service:
   nodePort: 30000 # Optional: If NodePort, specify this port (ensure it's available)
 
 webhooks:
-  enabled: true   # Whether webhooks are enabled
+  enabled: false   # Whether webhooks are enabled
   port: 8443      # Webhook port
 
 resources:

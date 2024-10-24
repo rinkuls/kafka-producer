@@ -21,3 +21,6 @@ resources:
   limits:
     memory: "1Gi"
     cpu: "1"
+serviceAccount:
+  create: true  # Set to true if the ServiceAccount should be created by Helm
+  name: ""      # Optionally specify a ServiceAccount name, leave blank to use the default name

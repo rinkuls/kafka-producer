@@ -50,11 +50,13 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.hostIP
-          # Commenting out the sslcert volumeMount
+            - name: CONTROL_CENTER_BOOTSTRAP_SERVERS
+              value: "kafka-producer-release:8165"  # Replace with your Kafka broker's service name and port
+          # Uncomment if you need sslcert volumeMount
           # volumeMounts:
           #   - name: sslcert
           #     mountPath: /etc/certificates
-      # Commenting out the volumes section
+      # Uncomment if you need sslcert volumes
       # volumes:
       #   - name: sslcert
       #     secret:

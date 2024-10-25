@@ -3,9 +3,14 @@ kind: Kafka
 metadata:
   name: kafka-cluster
   namespace: default
+  labels:
+    app.kubernetes.io/managed-by: "Helm"  # Required by Helm
+  annotations:
+    meta.helm.sh/release-name: "kafka-producer-release"  # Match the Helm release name
+    meta.helm.sh/release-namespace: "default"            # Match the Helm release namespace
 spec:
   replicas: 1
   dataVolumeCapacity: "10Gi"
   image:
-    application: "confluentinc/cp-server:7.4.1"  # Specifying image in the required format
-    init: "confluentinc/cp-init-container:7.4.1"  # Placeholder for required init container image
+    application: "confluentinc/cp-server:7.4.1"
+    init: "confluentinc/cp-init-container:7.4.1"

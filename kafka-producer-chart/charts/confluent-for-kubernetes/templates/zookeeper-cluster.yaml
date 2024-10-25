@@ -1,0 +1,12 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper-cluster
+  namespace: default
+spec:
+  replicas: 1
+  dataVolumeCapacity: "10Gi"           # Size of the data volume
+  logVolumeCapacity: "10Gi"            # Size of the log volume
+  image:
+    application: "confluentinc/cp-zookeeper:7.4.1"  # The application image
+    init: "confluentinc/cp-init-container:7.4.1"    # The init container image

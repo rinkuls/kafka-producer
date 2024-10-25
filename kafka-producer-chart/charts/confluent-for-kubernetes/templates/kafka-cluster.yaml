@@ -4,7 +4,7 @@ metadata:
   name: my-kafka-cluster
   namespace: default
 spec:
-  replicas: 3  # Number of Kafka broker replicas
+  replicas: 1  # Number of Kafka broker replicas
   listeners:
     plain:
       authentication:
@@ -20,4 +20,4 @@ spec:
   storage:
     type: persistent-claim
     size: 10Gi
-    class: managed-nfs-storage  # Change this based on your storage class
+    class: standard  # Updated storage class to 'standard' from 'managed-nfs-storage'

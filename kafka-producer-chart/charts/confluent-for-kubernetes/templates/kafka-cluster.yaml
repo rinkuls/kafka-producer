@@ -1,7 +1,7 @@
 apiVersion: kafka.confluent.io/v1beta1
 kind: Kafka
 metadata:
-  name: my-kafka-cluster
+  name: kafka-cluster
   namespace: default
 spec:
   replicas: 1  # Number of Kafka broker replicas

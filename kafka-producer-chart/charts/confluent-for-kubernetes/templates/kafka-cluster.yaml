@@ -1,23 +1,11 @@
-apiVersion: kafka.confluent.io/v1beta1
+apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
 metadata:
   name: kafka-cluster
   namespace: default
 spec:
-  replicas: 1  # Number of Kafka broker replicas
-  listeners:
-    plain:
-      authentication:
-        type: "none"  # Authentication options
-    ssl:
-      authentication:
-        type: "none"  # Change as needed
-  config:
-    # Basic Kafka broker configurations
-    log.dirs: "/var/lib/kafka/data"
-    num.partitions: 1
-    default.replication.factor: 1
-  storage:
-    type: persistent-claim
-    size: 10Gi
-    class: standard  # Updated storage class to 'standard' from 'managed-nfs-storage'
+  replicas: 1
+  dataVolumeCapacity: "10Gi"
+  image:
+    application: "confluentinc/cp-server:7.4.1"  # Specifying image in the required format
+    init: "confluentinc/cp-init-container:7.4.1"  # Placeholder for required init container image

@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/component: "confluent-operator"
     helm.sh/chart: {{ include "confluent-operator.chart" . }}
-    version: 7.4.1  # Updated to the specific version of Confluent Control Center
+    version: 7.4.1
   name: {{ .Values.name }}
   namespace: {{ .Release.Namespace }}
 spec:
@@ -28,11 +28,11 @@ spec:
         app: "confluent-operator"
         app.kubernetes.io/name: "confluent-operator"
         app.kubernetes.io/instance: {{ .Release.Name }}
-        version: 7.4.1  # Updated to the specific version of Confluent Control Center
+        version: 7.4.1
     spec:
       containers:
         - name: {{ .Values.name }}
-          image: confluentinc/cp-enterprise-control-center:7.4.1  # Updated image
+          image: confluentinc/cp-enterprise-control-center:7.4.1
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           resources:
             requests:
@@ -51,14 +51,6 @@ spec:
                 fieldRef:
                   fieldPath: status.hostIP
             - name: CONTROL_CENTER_BOOTSTRAP_SERVERS
-              value: "kafka-producer-release:8165"  # Your Kafka service
+              value: "kafka-deployment:9092"  # Updated to standard Kafka port
             - name: CONTROL_CENTER_REPLICATION_FACTOR
-              value: "1"  # Adjust as necessary for your setup
-      # Commenting out the sslcert volumeMount
-      # volumeMounts:
-      #   - name: sslcert
-      #     mountPath: /etc/certificates
-      # volumes:
-      #   - name: sslcert
-      #     secret:
-      #       secretName: confluent-cert
+              value: "3"  # Set to desired replication factor

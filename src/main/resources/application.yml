@@ -7,11 +7,11 @@ avro:
 
 spring:
   kafka:
-    bootstrap-servers: "192.168.49.2:9092"  # Internal IP of your Minikube node
+    bootstrap-servers: "kafka-deployment.default.svc.cluster.local:9092"  # Use the service name of your Kafka cluster
     producer:
       keySerializer: "org.apache.kafka.common.serialization.StringSerializer"
       valueSerializer: "io.confluent.kafka.serializers.KafkaAvroSerializer"
       properties:
         schema:
           registry:
-            url: "http://192.168.49.2:8081"  # Schema Registry URL
+            url: "http://schema-registry:8081"  # Use the service name of your Schema Registry

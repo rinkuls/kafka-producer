@@ -1,3 +1,5 @@
+# kafka-cluster.yaml
+
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
 metadata:
@@ -9,8 +11,26 @@ metadata:
     meta.helm.sh/release-name: "kafka-producer-release" # Match the Helm release name
     meta.helm.sh/release-namespace: "default"           # Match the Helm release namespace
 spec:
-  replicas: 1
+  replicas: 3
   dataVolumeCapacity: "10Gi"
   image:
     application: "confluentinc/cp-server:7.4.1"
     init: "confluentinc/cp-init-container:7.4.1"
+  config:
+    listeners: "PLAINTEXT://0.0.0.0:9092"
+    advertised.listeners: "PLAINTEXT://kafka-deployment.default.svc.cluster.local:9092"  # Updated service name
+    zookeeper:
+      connectionString: "confluent-for-kubernetes-zookeeper:2181"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-cluster
+  namespace: default
+spec:
+  ports:
+    - port: 9092
+      targetPort: 9092
+  selector:
+    app: kafka  # Updated to match the label in kafka-deployment.yaml

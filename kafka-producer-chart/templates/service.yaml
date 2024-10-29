@@ -7,9 +7,9 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
+    - port: 9092  # Standard Kafka port
+      targetPort: 9092
       protocol: TCP
-      name: http
+      name: kafka
   selector:
     {{- include "kafka-producer.selectorLabels" . | nindent 4 }}

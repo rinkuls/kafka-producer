@@ -4,14 +4,14 @@ metadata:
   name: zookeeper-cluster
   namespace: default
   labels:
-    app.kubernetes.io/managed-by: "Helm"                # Required by Helm
+    app.kubernetes.io/managed-by: "Helm"
   annotations:
-    meta.helm.sh/release-name: "kafka-producer-release"  # Match the Helm release name
-    meta.helm.sh/release-namespace: "default"            # Match the Helm release namespace
+    meta.helm.sh/release-name: "kafka-producer-release"
+    meta.helm.sh/release-namespace: "default"
 spec:
-  replicas: 1
-  dataVolumeCapacity: "10Gi"           # Size of the data volume
-  logVolumeCapacity: "10Gi"            # Size of the log volume
+  replicas: 3
+  dataVolumeCapacity: "10Gi"
+  logVolumeCapacity: "10Gi"
   image:
-    application: "confluentinc/cp-zookeeper:7.4.1"       # The application image
-    init: "confluentinc/cp-init-container:7.4.1"         # The init container image
+    application: "confluentinc/cp-zookeeper:7.4.1"
+    init: "confluentinc/cp-init-container:7.4.1"

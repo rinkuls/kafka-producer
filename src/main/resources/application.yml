@@ -14,4 +14,4 @@ spring:
       properties:
         schema:
           registry:
-            url: "http://schema-registry:8081"  # Use the service name of your Schema Registry
+            url: "http://my-schema-registry.default.svc.cluster.local:8081"  # Use the service name of your Schema Registry

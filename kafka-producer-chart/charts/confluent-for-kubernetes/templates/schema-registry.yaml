@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-schema-registry
+  namespace: default
+  labels:
+    app: my-schema-registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-schema-registry
+  template:
+    metadata:
+      labels:
+        app: my-schema-registry
+    spec:
+      containers:
+        - name: schema-registry
+          image: confluentinc/cp-schema-registry:7.4.1  # Use the correct version of the Schema Registry
+          ports:
+            - containerPort: 8081
+          env:
+            - name: SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL
+              value: "confluent-for-kubernetes-zookeeper:2181"  # Correct Zookeeper URL
+            - name: SCHEMA_REGISTRY_LISTENERS
+              value: "http://0.0.0.0:8081"  # The listener URL for the Schema Registry
+            - name: SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS
+              value: "PLAINTEXT://kafka-deployment.default.svc.cluster.local:9092"  # Kafka broker's address
+            - name: SCHEMA_REGISTRY_HOST_NAME
+              value: "my-schema-registry.default.svc.cluster.local"  # Set this to the service's full DNS name

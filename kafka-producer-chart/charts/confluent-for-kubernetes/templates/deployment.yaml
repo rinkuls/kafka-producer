@@ -53,4 +53,6 @@ spec:
             - name: CONTROL_CENTER_BOOTSTRAP_SERVERS
               value: "kafka-deployment:9092"  # Updated to standard Kafka port
             - name: CONTROL_CENTER_REPLICATION_FACTOR
-              value: "3"  # Set to desired replication factor
+              value: "1"  # Set to desired replication factor
+            - name: CONTROL_CENTER_KAFKA_BROKERS_EXPECTED_COUNT
+              value: "1"  # Expected number of brokers

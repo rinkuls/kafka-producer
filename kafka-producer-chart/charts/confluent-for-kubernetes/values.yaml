@@ -29,7 +29,7 @@ serviceAccount:
 # Zookeeper configuration
 zookeeper:
   enabled: true
-  replicas: 3
+  replicas: 1
   config:
     tickTime: 2000
     dataDir: /var/lib/zookeeper/data

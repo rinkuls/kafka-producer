@@ -11,7 +11,7 @@ metadata:
     meta.helm.sh/release-name: "kafka-producer-release" # Match the Helm release name
     meta.helm.sh/release-namespace: "default"           # Match the Helm release namespace
 spec:
-  replicas: 3
+  replicas: 1
   dataVolumeCapacity: "10Gi"
   image:
     application: "confluentinc/cp-server:7.4.1"

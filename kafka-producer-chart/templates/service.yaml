@@ -5,10 +5,10 @@ metadata:
   labels:
     {{- include "kafka-producer.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
+  type: NodePort
   ports:
-    - port: 9092  # Standard Kafka port
-      targetPort: 9092
+    - port: 8165   # Changed to match the port your application is running on
+      targetPort: 8165  # Ensure this is the same as your container port
       protocol: TCP
       name: kafka
   selector:

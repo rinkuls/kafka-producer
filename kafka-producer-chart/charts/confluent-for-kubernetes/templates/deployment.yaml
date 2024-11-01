@@ -51,8 +51,16 @@ spec:
                 fieldRef:
                   fieldPath: status.hostIP
             - name: CONTROL_CENTER_BOOTSTRAP_SERVERS
-              value: "kafka-deployment:9092"  # Updated to standard Kafka port
+              value: "kafka-deployment:9092"  # Kafka broker address
             - name: CONTROL_CENTER_REPLICATION_FACTOR
               value: "1"  # Set to desired replication factor
             - name: CONTROL_CENTER_KAFKA_BROKERS_EXPECTED_COUNT
               value: "1"  # Expected number of brokers
+
+            # === NEW ENVIRONMENT VARIABLES ADDED FOR CONTROL CENTER ===
+            - name: CONTROL_CENTER_KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS
+              value: "kafka-cluster:9092"  # Updated for Control Center
+            - name: CONTROL_CENTER_SCHEMA_REGISTRY_URL
+              value: "http://my-schema-registry.default.svc.cluster.local:8081"  # Updated Schema Registry URL
+          ports:
+            - containerPort: 9021  # Ensure this port matches the service port

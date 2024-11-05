@@ -28,6 +28,12 @@ public class KafkaProducerConfig {
     @Value("${spring.kafka.producer.properties.schema.registry.url}")
     private String schemaRegistryUrl;  // New: to pick the schema registry URL from application.yaml
 
+    @Value("${spring.kafka.producer.keySerializer}")
+    private String valueSerializer;  // New: to pick the schema registry URL from application.yaml
+
+    @Value("${spring.kafka.producer.valueSerializer}")
+    private String keySerializer;  // New: to pick the schema registry URL from application.yaml
+
     @Bean
     public KafkaTemplate<String, StudentRecord> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
@@ -42,8 +48,8 @@ public class KafkaProducerConfig {
     public Map<String, Object> producerConfigs() {
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);  // Using the injected kafkaServer
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class.getName());
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class.getName());
         props.put("schema.registry.url", schemaRegistryUrl);  // Using the injected schemaRegistryUrl
 
         return props;

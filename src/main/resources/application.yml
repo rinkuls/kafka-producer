@@ -5,15 +5,19 @@ avro:
   topic:
     name: "avroTopic"
   schema:
-    path: "classpath:avro/schemas/StudentRecord.avsc"  # Relative path in resources folder
+    path: "classpath:avro/schemas/StudentRecord.avsc"
+
+dlt:
+  topic:
+    name: "dltTopic"  # DLT topic name for error messages
 
 spring:
   kafka:
-    bootstrap-servers: "kafka-deployment.default.svc.cluster.local:9092"  # Use the service name of your Kafka cluster
+    bootstrap-servers: "kafka-deployment.default.svc.cluster.local:9092"
     producer:
       keySerializer: "io.confluent.kafka.serializers.KafkaAvroSerializer"
       valueSerializer: "io.confluent.kafka.serializers.KafkaAvroSerializer"
       properties:
         schema:
           registry:
-            url: "http://my-schema-registry.default.svc.cluster.local:8081"  # Use the service name of your Schema Registry
+            url: "http://my-schema-registry.default.svc.cluster.local:8081"

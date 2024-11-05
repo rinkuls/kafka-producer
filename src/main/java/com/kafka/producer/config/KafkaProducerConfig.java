@@ -16,19 +16,22 @@ import java.util.Map;
 public class KafkaProducerConfig {
 
     @Value("${spring.kafka.bootstrap-servers}")
-    private String kafkaServer;  // This will now pick the value from application.yaml
+    private String kafkaServer;
 
     @Value("${avro.topic.name}")
     private String topicName;
 
+    @Value("${dlt.topic.name}")
+    private String dltTopicName;
+
     @Value("${spring.kafka.producer.properties.schema.registry.url}")
-    private String schemaRegistryUrl;  // New: to pick the schema registry URL from application.yaml
+    private String schemaRegistryUrl;
 
     @Value("${spring.kafka.producer.keySerializer}")
-    private String valueSerializer;  // New: to pick the schema registry URL from application.yaml
+    private String keySerializer;
 
     @Value("${spring.kafka.producer.valueSerializer}")
-    private String keySerializer;  // New: to pick the schema registry URL from application.yaml
+    private String valueSerializer;
 
     @Bean
     public KafkaTemplate<String, Object> kafkaTemplate() {
@@ -41,12 +44,17 @@ public class KafkaProducerConfig {
     }
 
     @Bean
+    public NewTopic createDLTTopic() {
+        return new NewTopic(dltTopicName, 3, (short) 1);
+    }
+
+    @Bean
     public Map<String, Object> producerConfigs() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);  // Using the injected kafkaServer
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializer);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializer);
-        props.put("schema.registry.url", schemaRegistryUrl);  // Using the injected schemaRegistryUrl
+        props.put("schema.registry.url", schemaRegistryUrl);
         props.put("auto.register.schemas", "false");
 
         return props;
@@ -56,5 +64,4 @@ public class KafkaProducerConfig {
     public ProducerFactory<String, Object> producerFactory() {
         return new DefaultKafkaProducerFactory<>(producerConfigs());
     }
-
 }

@@ -18,27 +18,42 @@ public class KafkaSender {
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSender.class);
     @Value("${avro.topic.name}")
     String topicName;
+
+    @Value("${dlt.topic.name}")
+    String dltTopicName;
+
     @Autowired
     private KafkaTemplate<String, Object> kafkaTemplate;
 
     public void send(Object producerRecord) {
         String uniqueKey = producerRecord.getClass().getSimpleName() + "-" + UUID.randomUUID();
 
-        ListenableFuture<SendResult<String, Object>> future = kafkaTemplate.send(topicName, uniqueKey, producerRecord);
-        future.addCallback(new ListenableFutureCallback<>() {
-            @Override
-            public void onFailure(Throwable ex) {
-                LOGGER.info("*********************************Message failed to produce to kafka for this topic*************************************** " + topicName);
+        try {
+            ListenableFuture<SendResult<String, Object>> future = kafkaTemplate.send(topicName, uniqueKey, producerRecord);
+            future.addCallback(new ListenableFutureCallback<>() {
+                @Override
+                public void onFailure(Throwable ex) {
+                    LOGGER.error("Message failed to produce to Kafka topic {}", topicName);
+                    sendToDLT(uniqueKey, producerRecord);
+                }
 
-            }
+                @Override
+                public void onSuccess(SendResult<String, Object> result) {
+                    LOGGER.info("Data - {} successfully produced to Kafka topic - {}", producerRecord, topicName);
+                }
+            });
+        } catch (IllegalArgumentException ex) {
+            LOGGER.error("Unsupported message type for Avro serialization. Sending to DLT.", ex);
+            sendToDLT(uniqueKey, producerRecord);
+        }
+    }
 
-            @Override
-            public void onSuccess(SendResult<String, Object> result) {
-                LOGGER.info("Data - " + producerRecord + " Avro message successfully produced and sent to Kafka Topic - " + topicName);
-
-            }
-        });
-
-
+    private void sendToDLT(String key, Object producerRecord) {
+        try {
+            kafkaTemplate.send(dltTopicName, key, producerRecord).get();
+            LOGGER.info("Message sent to DLT topic: {}", dltTopicName);
+        } catch (Exception e) {
+            LOGGER.error("Failed to send message to DLT topic: {}", dltTopicName, e);
+        }
     }
 }

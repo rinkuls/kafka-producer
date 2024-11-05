@@ -3,7 +3,9 @@ server:
 
 avro:
   topic:
-    name: "avrotest1"
+    name: "avroTopic"
+  schema:
+    path: "classpath:avro/schemas/StudentRecord.avsc"  # Relative path in resources folder
 
 spring:
   kafka:

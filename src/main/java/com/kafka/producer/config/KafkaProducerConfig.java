@@ -55,7 +55,7 @@ public class KafkaProducerConfig {
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializer);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializer);
         props.put("schema.registry.url", schemaRegistryUrl);
-        props.put("auto.register.schemas", "false");
+        props.put("auto.register.schemas", "true");
 
         return props;
     }

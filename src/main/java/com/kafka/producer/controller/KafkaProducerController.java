@@ -15,23 +15,31 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/kafkaProducer")
 public class KafkaProducerController {
 
-	@Autowired
-	private KafkaSender sender;
+    @Autowired
+    private KafkaSender sender;
 
-	@PostMapping
-	public ResponseEntity<String> sendData(@RequestBody Student student){
-		StudentRecord studentRec= StudentRecord.newBuilder().build();
-		studentRec.setEmpId(student.getEmpId());
-		studentRec.setFirstName(student.getFirstName());
-		studentRec.setLastName(student.getLastName());
-		studentRec.setAge(student.getAge());
-		sender.send(studentRec);
-		return new ResponseEntity<>("Data sent to Kafka", HttpStatus.OK);
-	}
-	@GetMapping(value = "/health", produces = "application/json")
-	@ApiOperation(value = "health check for application", notes = "")
-	@ApiResponses({@ApiResponse(code = 200, message = "Successful response"), @ApiResponse(code = 500, message = "Application Down")})
-	public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {
-		return String.format("Hello %s!", name);
-	}
+    @PostMapping(value = "/student")
+    public ResponseEntity<String> sendData(@RequestBody Student student) {
+        StudentRecord studentRec = StudentRecord.newBuilder().build();
+        studentRec.setEmpId(student.getEmpId());
+        studentRec.setFirstName(student.getFirstName());
+        studentRec.setLastName(student.getLastName());
+        studentRec.setAge(student.getAge());
+        sender.send(studentRec);
+        return new ResponseEntity<>("Data sent to Kafka", HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/object")
+    public ResponseEntity<String> sendAnyData(@RequestBody Object producerObject) {
+        sender.send(producerObject);
+        return new ResponseEntity<>("Data sent to Kafka", HttpStatus.OK);
+    }
+
+
+    @GetMapping(value = "/health", produces = "application/json")
+    @ApiOperation(value = "health check for application", notes = "")
+    @ApiResponses({@ApiResponse(code = 200, message = "Successful response"), @ApiResponse(code = 500, message = "Application Down")})
+    public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {
+        return String.format("Hello %s!", name);
+    }
 }

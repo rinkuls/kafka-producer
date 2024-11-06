@@ -60,13 +60,13 @@ public class KafkaSender {
             future.addCallback(new ListenableFutureCallback<>() {
                 @Override
                 public void onFailure(Throwable ex) {
-                    LOGGER.error("Message failed to produce to Kafka dlt topic {}", topicName);
+                    LOGGER.error("Message failed to produce to Kafka dlt topic {}", dltTopicName);
 
                 }
 
                 @Override
                 public void onSuccess(SendResult<String, Object> result) {
-                    LOGGER.info("Data - {} successfully produced to Kafka dlt topic - {}", producerRecord, topicName);
+                    LOGGER.info("Data - {} successfully produced to Kafka dlt topic - {}", producerRecord, dltTopicName);
                 }
             });
         } catch (Exception e) {

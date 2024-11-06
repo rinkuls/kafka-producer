@@ -16,6 +16,7 @@ import java.util.UUID;
 public class KafkaSender {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaSender.class);
+
     @Value("${avro.topic.name}")
     String topicName;
 
@@ -24,6 +25,9 @@ public class KafkaSender {
 
     @Autowired
     private KafkaTemplate<String, Object> kafkaTemplate;
+
+    @Autowired
+    private KafkaTemplate<String, Object> dltKafkaTemplate;
 
     public void send(Object producerRecord) {
         String uniqueKey = producerRecord.getClass().getSimpleName() + "-" + UUID.randomUUID();
@@ -34,7 +38,7 @@ public class KafkaSender {
                 @Override
                 public void onFailure(Throwable ex) {
                     LOGGER.error("Message failed to produce to Kafka topic {}", topicName);
-                    sendToDLT(uniqueKey, producerRecord);
+                    sendToDLT(uniqueKey, producerRecord.toString()); // Send as a String to the DLT
                 }
 
                 @Override
@@ -44,14 +48,27 @@ public class KafkaSender {
             });
         } catch (IllegalArgumentException ex) {
             LOGGER.error("Unsupported message type for Avro serialization. Sending to DLT.", ex);
-            sendToDLT(uniqueKey, producerRecord);
+            sendToDLT(uniqueKey, producerRecord.toString());
         }
     }
 
-    private void sendToDLT(String key, Object producerRecord) {
+    private void sendToDLT(String key, String producerRecord) {
         try {
-            kafkaTemplate.send(dltTopicName, key, producerRecord).get();
+            ListenableFuture<SendResult<String, Object>> future = dltKafkaTemplate.send(dltTopicName, key, producerRecord);
             LOGGER.info("Message sent to DLT topic: {}", dltTopicName);
+
+            future.addCallback(new ListenableFutureCallback<>() {
+                @Override
+                public void onFailure(Throwable ex) {
+                    LOGGER.error("Message failed to produce to Kafka dlt topic {}", topicName);
+
+                }
+
+                @Override
+                public void onSuccess(SendResult<String, Object> result) {
+                    LOGGER.info("Data - {} successfully produced to Kafka dlt topic - {}", producerRecord, topicName);
+                }
+            });
         } catch (Exception e) {
             LOGGER.error("Failed to send message to DLT topic: {}", dltTopicName, e);
         }

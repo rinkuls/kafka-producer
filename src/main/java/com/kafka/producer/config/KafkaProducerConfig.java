@@ -3,6 +3,8 @@ package com.kafka.producer.config;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +17,8 @@ import java.util.Map;
 
 @Configuration
 public class KafkaProducerConfig {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(KafkaProducerConfig.class);
 
     @Value("${spring.kafka.bootstrap-servers}")
     private String kafkaServer;
@@ -34,33 +38,60 @@ public class KafkaProducerConfig {
     @Value("${spring.kafka.producer.valueSerializer}")
     private String valueSerializer;
 
-    // Primary KafkaTemplate for main topic (using Avro serialization)
+    /**
+     * Primary KafkaTemplate for main topic (using Avro serialization)
+     */
     @Bean
     public KafkaTemplate<String, Object> kafkaTemplate() {
+        LOGGER.info("Creating KafkaTemplate for main topic: {}", topicName);
         return new KafkaTemplate<>(producerFactory());
     }
 
-    // KafkaTemplate specifically for DLT topic (using String serialization)
+    /**
+     * KafkaTemplate specifically for DLT topic (using String serialization)
+     */
     @Bean
     public KafkaTemplate<String, Object> dltKafkaTemplate() {
+        LOGGER.info("Creating KafkaTemplate for DLT topic: {}", dltTopicName);
         return new KafkaTemplate<>(dltProducerFactory());
     }
 
-    // NewTopic for main topic
+    /**
+     * NewTopic for main topic with retention policy
+     */
     @Bean
     public NewTopic createTopic() {
-        return new NewTopic(topicName, 3, (short) 1);
+        LOGGER.info("Creating main topic: {}", topicName);
+        return new NewTopic(topicName, 3, (short) 1)
+                .configs(Map.of(
+                        "retention.ms", "604800000", // 7 days
+                        "cleanup.policy", "delete", // Default: delete old messages
+                        "retention.bytes", "-1"     // No size limit for retention
+                ));
     }
 
-    // NewTopic for DLT topic
+    /**
+     * NewTopic for DLT topic with retention policy
+     */
     @Bean
     public NewTopic createDLTTopic() {
-        return new NewTopic(dltTopicName, 3, (short) 1);
+        LOGGER.info("Creating DLT topic: {}", dltTopicName);
+        return new NewTopic(dltTopicName, 3, (short) 1)
+                .configs(Map.of(
+                        "retention.ms", "1209600000", // 14 days
+                        "cleanup.policy", "delete"
+                ));
     }
 
-    // Producer configs for main topic (Avro serialization)
+    /**
+     * Producer configs for main topic (Avro serialization)
+     */
     @Bean
     public Map<String, Object> producerConfigs() {
+        LOGGER.info("Loading producer configurations...");
+        assert kafkaServer != null : "Kafka server address cannot be null!";
+        assert schemaRegistryUrl != null : "Schema registry URL cannot be null!";
+
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializer);
@@ -70,15 +101,21 @@ public class KafkaProducerConfig {
         return props;
     }
 
-    // ProducerFactory for main topic
+    /**
+     * ProducerFactory for main topic
+     */
     @Bean
     public ProducerFactory<String, Object> producerFactory() {
+        LOGGER.info("Creating ProducerFactory for main topic.");
         return new DefaultKafkaProducerFactory<>(producerConfigs());
     }
 
-    // ProducerFactory specifically for DLT topic (String serialization)
+    /**
+     * ProducerFactory specifically for DLT topic (String serialization)
+     */
     @Bean
     public ProducerFactory<String, Object> dltProducerFactory() {
+        LOGGER.info("Creating ProducerFactory for DLT topic.");
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);

@@ -12,7 +12,7 @@ metadata:
     meta.helm.sh/release-namespace: "default"           # Match the Helm release namespace
 spec:
   replicas: 1
-  dataVolumeCapacity: "10Gi"
+  dataVolumeCapacity: "20Gi"
   image:
     application: "confluentinc/cp-server:7.4.1"
     init: "confluentinc/cp-init-container:7.4.1"

@@ -64,7 +64,7 @@ public class KafkaProducerConfig {
         LOGGER.info("Creating main topic: {}", topicName);
         return new NewTopic(topicName, 3, (short) 1)
                 .configs(Map.of(
-                        "retention.ms", "604800000", // 7 days
+                        "retention.ms", "-1", // 7 days
                         "cleanup.policy", "delete", // Default: delete old messages
                         "retention.bytes", "-1"     // No size limit for retention
                 ));
@@ -78,7 +78,7 @@ public class KafkaProducerConfig {
         LOGGER.info("Creating DLT topic: {}", dltTopicName);
         return new NewTopic(dltTopicName, 3, (short) 1)
                 .configs(Map.of(
-                        "retention.ms", "1209600000", // 14 days
+                        "retention.ms", "-1", // 14 days
                         "cleanup.policy", "delete"
                 ));
     }

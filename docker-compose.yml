@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:5.4.0
@@ -10,6 +8,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - proxy_net
 
   broker:
     image: confluentinc/cp-server:5.4.0
@@ -23,7 +23,7 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.178.24:9092,PLAINTEXT_HOST://broker:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://172.20.0.1:9092,PLAINTEXT_HOST://broker:29092
       KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
@@ -33,13 +33,16 @@ services:
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
       CONFLUENT_METRICS_ENABLE: "true"
       CONFLUENT_SUPPORT_CUSTOMER_ID: "anonymous"
+    networks:
+      - proxy_net
 
   kafka-tools:
     image: confluentinc/cp-kafka:5.4.0
     hostname: kafka-tools
     container_name: kafka-tools
     command: ["tail", "-f", "/dev/null"]
-    network_mode: "host"
+    network_mode: "host"  # Keep host mode if required
+    # Removed `networks` because `network_mode: host` conflicts with it
 
   schema-registry:
     image: confluentinc/cp-schema-registry:5.4.0
@@ -53,6 +56,8 @@ services:
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: "zookeeper:2181"
+    networks:
+      - proxy_net
 
   control-center:
     image: confluentinc/cp-enterprise-control-center:5.4.0
@@ -73,6 +78,8 @@ services:
       CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
       CONFLUENT_METRICS_TOPIC_REPLICATION: 1
       PORT: 9021
+    networks:
+      - proxy_net
 
   app:
     build:
@@ -80,14 +87,17 @@ services:
       dockerfile: Dockerfile
     container_name: 'kafka-producer'
     environment:
-      SPRING_KAFKA_BOOTSTRAPSERVERS: 192.168.178.24:9092
+      SPRING_KAFKA_BOOTSTRAPSERVERS: 172.20.0.1:9092
+      USE_DOCKER_COMPOSE: true
     ports:
-      - '8178:8178'
+      - '8165:8165'
     depends_on:
-      - broker
+    - broker
+    - schema-registry
+    - control-center
     networks:
       - proxy_net
 
 networks:
   proxy_net:
-   name: custom_network
+    name: custom_network

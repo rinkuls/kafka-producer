@@ -20,4 +20,5 @@ spring:
       properties:
         schema:
           registry:
+            DockerComposeUrl: "http://schema-registry:8081"
             url: "http://my-schema-registry.default.svc.cluster.local:8081"

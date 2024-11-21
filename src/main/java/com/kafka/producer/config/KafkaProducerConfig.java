@@ -29,14 +29,20 @@ public class KafkaProducerConfig {
     @Value("${dlt.topic.name}")
     private String dltTopicName;
 
+    @Value("${spring.kafka.producer.properties.schema.registry.DockerComposeUrl}")
+    private String dockerComposeSchemaRegistryUrl;
+
     @Value("${spring.kafka.producer.properties.schema.registry.url}")
-    private String schemaRegistryUrl;
+    private String clusterSchemaRegistryUrl;
 
     @Value("${spring.kafka.producer.keySerializer}")
     private String keySerializer;
 
     @Value("${spring.kafka.producer.valueSerializer}")
     private String valueSerializer;
+
+    @Value("${USE_DOCKER_COMPOSE:false}") // Environment variable to control schema registry URL
+    private boolean useDockerCompose;
 
     /**
      * Primary KafkaTemplate for main topic (using Avro serialization)
@@ -64,7 +70,7 @@ public class KafkaProducerConfig {
         LOGGER.info("Creating main topic: {}", topicName);
         return new NewTopic(topicName, 3, (short) 1)
                 .configs(Map.of(
-                        "retention.ms", "-1", // 7 days
+                        "retention.ms", "604800000", // 7 days
                         "cleanup.policy", "delete", // Default: delete old messages
                         "retention.bytes", "-1"     // No size limit for retention
                 ));
@@ -78,7 +84,7 @@ public class KafkaProducerConfig {
         LOGGER.info("Creating DLT topic: {}", dltTopicName);
         return new NewTopic(dltTopicName, 3, (short) 1)
                 .configs(Map.of(
-                        "retention.ms", "-1", // 14 days
+                        "retention.ms", "604800000", // 14 days
                         "cleanup.policy", "delete"
                 ));
     }
@@ -89,8 +95,13 @@ public class KafkaProducerConfig {
     @Bean
     public Map<String, Object> producerConfigs() {
         LOGGER.info("Loading producer configurations...");
-        assert kafkaServer != null : "Kafka server address cannot be null!";
-        assert schemaRegistryUrl != null : "Schema registry URL cannot be null!";
+        LOGGER.info("****************************************************************************************" +
+                "*******************************************************************" +
+                "***********************************************************" +
+                "*********************below " +
+                "is the value of useDockerCompose" + "--------------------" + useDockerCompose + "--------------------------------");
+        String schemaRegistryUrl = useDockerCompose ? dockerComposeSchemaRegistryUrl : clusterSchemaRegistryUrl;
+        LOGGER.info("Using schema registry URL: {}", schemaRegistryUrl);
 
         Map<String, Object> props = new HashMap<>();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);

@@ -13,7 +13,7 @@ dlt:
 
 spring:
   kafka:
-    bootstrap-servers: "kafka-deployment.default.svc.cluster.local:9092"
+    bootstrap-servers: "kafka-deployment.kafka-infra.svc.cluster.local:9092"
     producer:
       keySerializer: "io.confluent.kafka.serializers.KafkaAvroSerializer"
       valueSerializer: "io.confluent.kafka.serializers.KafkaAvroSerializer"
@@ -21,4 +21,4 @@ spring:
         schema:
           registry:
             DockerComposeUrl: "http://schema-registry:8081"
-            url: "http://my-schema-registry.default.svc.cluster.local:8081"
+            url: "http://my-schema-registry.kafka-infra.svc.cluster.local:8081"

@@ -9,13 +9,14 @@ avro:
 
 dlt:
   topic:
-    name: "dltTopic"  # DLT topic name for error messages
+    name: "topicForWrongSchema"  # DLT topic name for error messages
 
 spring:
   kafka:
     bootstrap-servers: "kafka-deployment.kafka-infra.svc.cluster.local:9092"
+    bootstrap-servers-compose: "172.20.0.1:9092"
     producer:
-      keySerializer: "io.confluent.kafka.serializers.KafkaAvroSerializer"
+      keySerializer: "org.apache.kafka.common.serialization.StringSerializer"
       valueSerializer: "io.confluent.kafka.serializers.KafkaAvroSerializer"
       properties:
         schema:

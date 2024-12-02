@@ -1,5 +1,6 @@
 package com.kafka.producer.config;
 
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -22,12 +23,13 @@ public class KafkaProducerConfig {
 
     @Value("${spring.kafka.bootstrap-servers}")
     private String kafkaServer;
-
+    @Value("${spring.kafka.bootstrap-servers-compose}")
+    private String kafkaServerForDockerCompose;
     @Value("${avro.topic.name}")
     private String topicName;
 
     @Value("${dlt.topic.name}")
-    private String dltTopicName;
+    private String topicForWrongSchema;
 
     @Value("${spring.kafka.producer.properties.schema.registry.DockerComposeUrl}")
     private String dockerComposeSchemaRegistryUrl;
@@ -41,7 +43,7 @@ public class KafkaProducerConfig {
     @Value("${spring.kafka.producer.valueSerializer}")
     private String valueSerializer;
 
-    @Value("${USE_DOCKER_COMPOSE:false}") // Environment variable to control schema registry URL
+    @Value("${USE_DOCKER_COMPOSE:false}")
     private boolean useDockerCompose;
 
     /**
@@ -58,7 +60,7 @@ public class KafkaProducerConfig {
      */
     @Bean
     public KafkaTemplate<String, Object> dltKafkaTemplate() {
-        LOGGER.info("Creating KafkaTemplate for DLT topic: {}", dltTopicName);
+        LOGGER.info("Creating KafkaTemplate for topicForWrongSchema topic: {}", topicForWrongSchema);
         return new KafkaTemplate<>(dltProducerFactory());
     }
 
@@ -81,8 +83,8 @@ public class KafkaProducerConfig {
      */
     @Bean
     public NewTopic createDLTTopic() {
-        LOGGER.info("Creating DLT topic: {}", dltTopicName);
-        return new NewTopic(dltTopicName, 3, (short) 1)
+        LOGGER.info("Creating DLT topic: {}", topicForWrongSchema);
+        return new NewTopic(topicForWrongSchema, 3, (short) 1)
                 .configs(Map.of(
                         "retention.ms", "604800000", // 14 days
                         "cleanup.policy", "delete"
@@ -95,16 +97,11 @@ public class KafkaProducerConfig {
     @Bean
     public Map<String, Object> producerConfigs() {
         LOGGER.info("Loading producer configurations...");
-        LOGGER.info("****************************************************************************************" +
-                "*******************************************************************" +
-                "***********************************************************" +
-                "*********************below " +
-                "is the value of useDockerCompose" + "--------------------" + useDockerCompose + "--------------------------------");
         String schemaRegistryUrl = useDockerCompose ? dockerComposeSchemaRegistryUrl : clusterSchemaRegistryUrl;
-        LOGGER.info("Using schema registry URL: {}", schemaRegistryUrl);
-
+        String finalKafkaServer = useDockerCompose ? kafkaServerForDockerCompose : kafkaServer;
         Map<String, Object> props = new HashMap<>();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
+
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, finalKafkaServer); //just changed
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializer);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializer);
         props.put("schema.registry.url", schemaRegistryUrl);
@@ -128,9 +125,15 @@ public class KafkaProducerConfig {
     public ProducerFactory<String, Object> dltProducerFactory() {
         LOGGER.info("Creating ProducerFactory for DLT topic.");
         Map<String, Object> props = new HashMap<>();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
+
+
+        String schemaRegistryUrl = useDockerCompose ? dockerComposeSchemaRegistryUrl : clusterSchemaRegistryUrl;
+        String finalKafkaServer = useDockerCompose ? kafkaServerForDockerCompose : kafkaServer;
+
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, finalKafkaServer);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class);
+        props.put("schema.registry.url", schemaRegistryUrl);
         return new DefaultKafkaProducerFactory<>(props);
     }
 }

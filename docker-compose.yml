@@ -40,7 +40,7 @@ services:
     image: confluentinc/cp-kafka:5.4.0
     hostname: kafka-tools
     container_name: kafka-tools
-    command: ["tail", "-f", "/dev/null"]
+    command: [ "tail", "-f", "/dev/null" ]
     network_mode: "host"  # Keep host mode if required
     # Removed `networks` because `network_mode: host` conflicts with it
 
@@ -92,9 +92,9 @@ services:
     ports:
       - '8165:8165'
     depends_on:
-    - broker
-    - schema-registry
-    - control-center
+      - broker
+      - schema-registry
+      - control-center
     networks:
       - proxy_net
 

@@ -1,7 +1,7 @@
 package com.kafka.producer.Kafka;
 
 import com.kafka.producer.service.KafkaSender;
-import com.rinkul.avro.schema.StudentRecord;
+import com.rinkul.avro.schema.EmployeeRecord;
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -10,7 +10,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -48,7 +47,7 @@ class KafkaProducerAvroIntegrationTest {
     @Autowired
     private EmbeddedKafkaBroker embeddedKafkaBroker;
 
-    private Consumer<String, StudentRecord> consumer;
+    private Consumer<String, EmployeeRecord> consumer;
     private Consumer<String, String> dltConsumer;
     private MockSchemaRegistryClient mockSchemaRegistryClient;
 
@@ -58,7 +57,7 @@ class KafkaProducerAvroIntegrationTest {
 
         // Register schema in mock registry
         try {
-            mockSchemaRegistryClient.register(topicName + "-value", StudentRecord.getClassSchema());
+            mockSchemaRegistryClient.register(topicName + "-value", EmployeeRecord.getClassSchema());
         } catch (Exception e) {
             throw new RuntimeException("Failed to register schema in mock registry", e);
         }
@@ -104,7 +103,7 @@ class KafkaProducerAvroIntegrationTest {
         embeddedKafkaBroker.getKafkaServers().forEach(server -> server.awaitShutdown());
     }
 
-   // @Test
+    // @Test
     void testSendAvroMessageToKafka() {
 
         Map<String, Object> consumerProps = KafkaTestUtils.consumerProps("testGroup", "true", embeddedKafkaBroker);
@@ -115,24 +114,24 @@ class KafkaProducerAvroIntegrationTest {
         consumerProps.put("specific.avro.reader", "true");
         consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest"); // Ensure consumer starts from the beginning
 
-        DefaultKafkaConsumerFactory<String, StudentRecord> consumerFactory = new DefaultKafkaConsumerFactory<>(consumerProps);
+        DefaultKafkaConsumerFactory<String, EmployeeRecord> consumerFactory = new DefaultKafkaConsumerFactory<>(consumerProps);
         consumer = consumerFactory.createConsumer();
         embeddedKafkaBroker.consumeFromAnEmbeddedTopic(consumer, topicName);
         // Arrange
-        StudentRecord testStudent = StudentRecord.newBuilder()
+        EmployeeRecord employeeRecord = EmployeeRecord.newBuilder()
                 .setEmpId(123L)
                 .setFirstName("John")
                 .setLastName("Doe")
-                .setAge(25)
+                .setEmail("25test@gmail.com")
                 .build();
 
         // Act
-        kafkaSender.send(testStudent);
+        kafkaSender.send(employeeRecord);
 
         // Assert
-        ConsumerRecord<String, StudentRecord> singleRecord = KafkaTestUtils.getSingleRecord(consumer, topicName);
+        ConsumerRecord<String, EmployeeRecord> singleRecord = KafkaTestUtils.getSingleRecord(consumer, topicName);
         assertThat(singleRecord).isNotNull();
-        assertThat(singleRecord.value()).isEqualTo(testStudent);
+        assertThat(singleRecord.value()).isEqualTo(employeeRecord);
     }
 
     //@Test

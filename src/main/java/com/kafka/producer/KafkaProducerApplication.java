@@ -8,8 +8,8 @@ import org.springframework.kafka.annotation.EnableKafka;
 @EnableKafka
 public class KafkaProducerApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(KafkaProducerApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(KafkaProducerApplication.class, args);
+    }
 
 }

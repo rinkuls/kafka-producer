@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Exception Raise Tool (Kafka Producer)</title>
+  <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+        }
+        form {
+            max-width: 600px;
+            margin: auto;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input, button {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        input:invalid {
+            border-color: red;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .message {
+            text-align: center;
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<h1>Employee Exception Raise Tool</h1>
+<form id="exceptionForm">
+  <label for="empId">Employee ID:</label>
+  <input type="number" id="empId" name="empId" required placeholder="Enter Employee ID">
+
+  <label for="firstName">First Name:</label>
+  <input type="text" id="firstName" name="firstName" required pattern="[A-Za-z]+" placeholder="Enter First Name">
+
+  <label for="lastName">Last Name:</label>
+  <input type="text" id="lastName" name="lastName" required pattern="[A-Za-z]+" placeholder="Enter Last Name">
+
+  <label for="email">Email:</label>
+  <input type="email" id="email" name="email" required placeholder="Enter Valid Email">
+
+  <button type="submit">Submit</button>
+  <div id="message" class="message"></div>
+</form>
+
+<script>
+        const form = document.getElementById('exceptionForm');
+        const messageDiv = document.getElementById('message');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Get form data and ensure empId is parsed as a number
+            const formData = {
+                empId: parseInt(document.getElementById('empId').value, 10), // Parse empId to number
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value
+            };
+
+            try {
+                const response = await fetch('http://localhost:8165/api/v1/raiseException/employee', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                if (response.ok) {
+                    const result = await response.text();
+                    messageDiv.textContent = 'Success: ' + result;
+                    messageDiv.style.color = 'green';
+                } else {
+                    const error = await response.json();
+                    messageDiv.textContent = 'Error: ' + error.message;
+                    messageDiv.style.color = 'red';
+                }
+            } catch (err) {
+                messageDiv.textContent = 'An unexpected error occurred.';
+                messageDiv.style.color = 'red';
+            }
+        });
+    </script>
+</body>
+</html>

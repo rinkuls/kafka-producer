@@ -5,8 +5,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.KafkaException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,21 +19,41 @@ public class KafkaExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex) {
-        LOGGER.error("Error processing message: {}", ex.getMessage());
+        LOGGER.error("Invalid argument provided: {}", ex.getMessage());
 
         Map<String, Object> response = new HashMap<>();
         response.put("status", HttpStatus.BAD_REQUEST);
-        response.put("message", "Invalid message type: Only Avro StudentRecord messages are allowed.");
+        response.put("message", "Invalid message type: Only Avro EmployeeRecord messages are allowed.");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(KafkaException.class)
     public ResponseEntity<Object> handleKafkaException(KafkaException ex) {
-        LOGGER.error("Kafka error: {}", ex.getMessage());
+        LOGGER.error("Kafka error occurred: {}", ex.getMessage());
 
         Map<String, Object> response = new HashMap<>();
         response.put("status", HttpStatus.INTERNAL_SERVER_ERROR);
         response.put("message", "Internal Kafka error. Please try again later.");
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Object> handleValidationException(MethodArgumentNotValidException ex) {
+        LOGGER.error("Validation error: {}", ex.getBindingResult().getFieldError().getDefaultMessage());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", HttpStatus.BAD_REQUEST);
+        response.put("message", ex.getBindingResult().getFieldError().getDefaultMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleGenericException(Exception ex) {
+        LOGGER.error("An unexpected error occurred: {}", ex.getMessage());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", HttpStatus.INTERNAL_SERVER_ERROR);
+        response.put("message", "An unexpected error occurred. Please contact support.");
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

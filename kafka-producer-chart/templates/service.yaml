@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: { { include "kafka-producer.fullname" . } }
+  name: {{ include "kafka-producer.fullname" . }}
   labels:
-    { { - include "kafka-producer.labels" . | nindent 4 } }
+    {{- include "kafka-producer.labels" . | nindent 4 }}
 spec:
   type: NodePort
   ports:
@@ -12,4 +12,4 @@ spec:
       protocol: TCP
       name: kafka
   selector:
-    { { - include "kafka-producer.selectorLabels" . | nindent 4 } }
+    {{- include "kafka-producer.selectorLabels" . | nindent 4 }}
